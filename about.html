@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>SkillSwap — About Us</title>
+    <link href="style.css" rel="stylesheet"/>
+    <style>
+
+        .about-hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 80px 20px 100px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='2' fill='rgba(255,255,255,0.08)'/%3E%3C/svg%3E") repeat;
+        }
+
+        .about-hero h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            margin-bottom: 16px;
+            position: relative;
+            letter-spacing: -0.5px;
+        }
+
+        .about-hero p {
+            font-size: 1.1rem;
+            max-width: 560px;
+            margin: 0 auto;
+            opacity: 0.9;
+            line-height: 1.7;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.35);
+            padding: 6px 18px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        /* ===== ABOUT SECTIONS ===== */
+        .about-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .section-subtitle {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-bottom: 36px;
+            line-height: 1.6;
+        }
+
+        /* ===== MISSION CARD ===== */
+        .mission-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 40px;
+            margin-bottom: 50px;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+
+        .mission-icon {
+            font-size: 3rem;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .mission-text h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--primary);
+        }
+
+        .mission-text p {
+            color: var(--text-light);
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+
+        /* ===== HOW IT WORKS ===== */
+        .how-it-works {
+            margin-bottom: 50px;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .step-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 28px 22px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+
+        .step-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .step-number {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 28px;
+            height: 28px;
+            background: var(--primary);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .step-emoji {
+            font-size: 2.2rem;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .step-card h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .step-card p {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* ===== STATS ===== */
+        .stats-section {
+            background: var(--primary);
+            border-radius: var(--radius);
+            padding: 40px;
+            margin-bottom: 50px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 30px;
+            text-align: center;
+        }
+
+        .stat-item h3 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: white;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .stat-item p {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.75);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ===== FEATURES ===== */
+        .features-section {
+            margin-bottom: 50px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 24px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+        }
+
+        .feature-card:hover { transform: translateY(-3px); }
+
+        .feature-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .feature-text h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+
+        .feature-text p {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* ===== TEAM ===== */
+        .team-section {
+            margin-bottom: 50px;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        .team-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 28px 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+        }
+
+        .team-card:hover { transform: translateY(-4px); }
+
+        .team-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 14px;
+        }
+
+        .team-card h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .team-role {
+            font-size: 0.75rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .team-card p {
+            font-size: 0.78rem;
+            color: var(--text-light);
+            line-height: 1.5;
+        }
+
+        /* ===== VALUES ===== */
+        .values-section {
+            margin-bottom: 50px;
+        }
+
+        .values-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .value-item {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            box-shadow: var(--shadow);
+        }
+
+        .value-emoji { font-size: 1.8rem; flex-shrink: 0; }
+
+        .value-item h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .value-item p {
+            font-size: 0.82rem;
+            color: var(--text-light);
+            line-height: 1.5;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: var(--radius);
+            padding: 50px 30px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .cta-section h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .cta-section p {
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-btn-primary {
+            background: white;
+            color: var(--primary);
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
+        }
+
+        .cta-btn-primary:hover { opacity: 0.92; transform: scale(0.98); }
+
+        .cta-btn-outline {
+            background: transparent;
+            color: white;
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            border: 2px solid rgba(255,255,255,0.7);
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
+        }
+
+        .cta-btn-outline:hover { background: rgba(255,255,255,0.1); transform: scale(0.98); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .mission-card { flex-direction: column; padding: 28px 20px; }
+            .stats-section { padding: 28px 20px; }
+            .about-hero { padding: 50px 20px 70px; }
+        }
+    </style>
+</head>
+<body>
+
+
+<nav class="navbar">
+    <h2 class="logo" onclick="location.href='index.html'">
+        <span>🔄</span> SkillSwap
+    </h2>
+    <div class="nav-right">
+        <a href="index.html" style="text-decoration:none" title="Home">
+            <button>🏠</button>
+        </a>
+        <a href="contact.html" style="text-decoration:none">
+            <button style="background:transparent; border:2px solid var(--primary); color:var(--primary);">Contact Us</button>
+        </a>
+        <button class="mode-btn" id="modeBtn" onclick="toggleMode()" title="Toggle dark mode">🌙</button>
+    </div>
+</nav>
+
+
+<section class="about-hero">
+    <div class="hero-badge">✦ Our Story</div>
+    <h1>Learn Anything.<br/>Teach What You Know.</h1>
+    <p>SkillSwap was built on one simple idea — everyone has something valuable to offer. No money needed, just the willingness to share and grow.</p>
+</section>
+
+<!-- MAIN CONTENT -->
+<div class="about-content">
+
+    <!-- MISSION -->
+    <div class="mission-card">
+        <div class="mission-icon">🎯</div>
+        <div class="mission-text">
+            <h2>Our Mission</h2>
+            <p>We believe that knowledge should be accessible to everyone, regardless of their financial situation. SkillSwap creates a world where your expertise becomes your currency — where a graphic designer can learn guitar simply by sharing their design knowledge. We're building the world's largest community of passionate learners and teachers who believe in the power of reciprocal learning.</p>
+        </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div class="how-it-works">
+        <div class="section-title">How SkillSwap Works</div>
+        <div class="section-subtitle">Three simple steps to start learning — without spending a dime.</div>
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <span class="step-emoji">📝</span>
+                <h3>List Your Skills</h3>
+                <p>Tell the community what you can teach and what you want to learn.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <span class="step-emoji">🤝</span>
+                <h3>Find a Match</h3>
+                <p>Browse the marketplace and connect with someone who has what you need.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <span class="step-emoji">📅</span>
+                <h3>Book a Session</h3>
+                <p>Schedule your swap session directly on the platform using our scheduler.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <span class="step-emoji">🪙</span>
+                <h3>Earn Skill Coins</h3>
+                <p>Teach others to earn coins. Spend them to learn from anyone — even without a perfect match.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-section">
+        <div class="stat-item">
+            <h3>12K+</h3>
+            <p>Active Members</p>
+        </div>
+        <div class="stat-item">
+            <h3>340+</h3>
+            <p>Unique Skills</p>
+        </div>
+        <div class="stat-item">
+            <h3>8.5K</h3>
+            <p>Sessions Completed</p>
+        </div>
+        <div class="stat-item">
+            <h3>4.9⭐</h3>
+            <p>Avg. Trust Score</p>
+        </div>
+    </div>
+
+    <!-- FEATURES -->
+    <div class="features-section">
+        <div class="section-title">What Makes Us Different</div>
+        <div class="section-subtitle">Thoughtfully designed features that make skill exchange seamless and trustworthy.</div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🪙</div>
+                <div class="feature-text">
+                    <h3>Skill Coins System</h3>
+                    <p>No perfect match? No problem. Earn coins by teaching and spend them to learn from anyone on the platform.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <div class="feature-text">
+                    <h3>Real-Time Chat</h3>
+                    <p>Coordinate your sessions like a messaging app. Fast, simple, and built right into the platform.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⭐</div>
+                <div class="feature-text">
+                    <h3>Trust Score</h3>
+                    <p>Built from real reviews after every session. Know exactly who you're learning from before you commit.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📅</div>
+                <div class="feature-text">
+                    <h3>Session Scheduler</h3>
+                    <p>Book your swap sessions directly on the platform. No back-and-forth emails, no confusion.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <div class="feature-text">
+                    <h3>Zero Money Involved</h3>
+                    <p>Pure skill-for-skill exchange. No payment info, no subscriptions, no hidden fees. Ever.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌍</div>
+                <div class="feature-text">
+                    <h3>Global Community</h3>
+                    <p>Connect with learners and teachers from around the world. Language and borders don't limit knowledge.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VALUES -->
+    <div class="values-section">
+        <div class="section-title">Our Values</div>
+        <div class="section-subtitle">The principles that guide everything we build and every decision we make.</div>
+        <div class="values-list">
+            <div class="value-item">
+                <div class="value-emoji">🌱</div>
+                <div>
+                    <h3>Accessibility First</h3>
+                    <p>Learning should never be gated by money. We design every feature with inclusion in mind.</p>
+                </div>
+            </div>
+            <div class="value-item">
+                <div class="value-emoji">🤝</div>
+                <div>
+                    <h3>Reciprocity</h3>
+                    <p>Everyone teaches. Everyone learns. A community thrives when knowledge flows in both directions.</p>
+                </div>
+            </div>
+            <div class="value-item">
+                <div class="value-emoji">🛡️</div>
+                <div>
+                    <h3>Trust & Safety</h3>
+                    <p>Our Trust Score system and verified reviews ensure you always know who you're learning from.</p>
+                </div>
+            </div>
+            <div class="value-item">
+                <div class="value-emoji">🚀</div>
+                <div>
+                    <h3>Continuous Improvement</h3>
+                    <p>We listen, we iterate, and we grow alongside our community. Your feedback shapes the platform.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TEAM -->
+    <div class="team-section">
+        <div class="section-title">Meet the Team</div>
+        <div class="section-subtitle">A small team with a big belief — that knowledge is the most generous gift.</div>
+        <div class="team-grid">
+            <div class="team-card">
+                <div class="team-avatar">👩‍💻</div>
+                <h3>Sara Al-Rashid</h3>
+                <div class="team-role">Co-Founder & CEO</div>
+                <p>Former educator passionate about democratizing access to learning.</p>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar">👨‍🎨</div>
+                <h3>Omar Fathi</h3>
+                <div class="team-role">Head of Design</div>
+                <p>Believes great design makes complex ideas feel effortless and human.</p>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar">👩‍🔬</div>
+                <h3>Layla Hassan</h3>
+                <div class="team-role">Lead Engineer</div>
+                <p>Builds the systems that keep every session smooth and every match smart.</p>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar">👨‍📊</div>
+                <h3>Karim Nour</h3>
+                <div class="team-role">Community Lead</div>
+                <p>Nurtures the community and makes sure every member feels heard and valued.</p>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="cta-section">
+        <h2>Ready to Start Swapping?</h2>
+        <p>Join thousands of learners and teachers who are growing together — for free.</p>
+        <div class="cta-buttons">
+            <a href="index.html" class="cta-btn-primary">Browse Skills</a>
+            <a href="contact.html" class="cta-btn-outline">Get in Touch</a>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    <p>© 2025 SkillSwap — Learn more, spend less. &nbsp;|&nbsp; <a href="about.html" style="color:var(--primary)">About</a> &nbsp;|&nbsp; <a href="contact.html" style="color:var(--primary)">Contact</a></p>
+</footer>
+
+<script src="main.js"></script>
+
+</body>
+</html>

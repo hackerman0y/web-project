@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillSwap - Store</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+        }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 24px;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 12px rgba(108,99,255,0.07);
+        }
+        .navbar h2 {
+            color: var(--primary);
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: -0.3px;
+        }
+        .nav-right { display: flex; gap: 10px; align-items: center; }
+
+        /* ── COIN COUNTER IN NAVBAR ── */
+        .coin-nav-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(245,158,11,0.35);
+            letter-spacing: 0.2px;
+        }
+        .coin-nav-badge .coin-icon { font-size: 1rem; }
+
+        .nav-icon-btn {
+            background: transparent;
+            border: 1.5px solid var(--border);
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; cursor: pointer;
+            color: var(--text-light);
+            transition: all 0.15s;
+        }
+        .nav-icon-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+        .mode-btn {
+            background: transparent;
+            border: 1.5px solid var(--border);
+            color: var(--text-light);
+            padding: 6px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .mode-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* ── HERO BANNER ── */
+        .store-hero {
+            background: linear-gradient(135deg, #6c63ff 0%, #8b5cf6 50%, #a78bfa 100%);
+            padding: 36px 24px 28px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .store-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .store-hero-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+            position: relative;
+        }
+        .store-hero-sub {
+            font-size: 0.88rem;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        /* ── COIN BALANCE CARD ── */
+        .balance-card {
+            display: inline-flex;
+            align-items: center;
+            gap: 16px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 20px;
+            padding: 14px 28px;
+            position: relative;
+        }
+        .balance-coin-icon {
+            font-size: 2.2rem;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .balance-info { text-align: left; }
+        .balance-label {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.7);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .balance-amount {
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -1px;
+            line-height: 1;
+        }
+
+        /* ── EARN HINT ── */
+        .earn-hint {
+            margin-top: 14px;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.65);
+            position: relative;
+        }
+        .earn-hint span {
+            background: rgba(255,255,255,0.15);
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin: 0 3px;
+        }
+
+        /* ── CONTENT WRAPPER ── */
+        .store-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 28px 20px 60px;
+        }
+
+        /* ── CATEGORY TABS ── */
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 28px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding-bottom: 4px;
+        }
+        .category-tabs::-webkit-scrollbar { display: none; }
+
+        .cat-tab {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: 1.5px solid var(--border);
+            background: var(--card);
+            color: var(--text-light);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.18s;
+            font-family: inherit;
+        }
+        .cat-tab:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .cat-tab.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(108,99,255,0.3);
+        }
+
+        /* ── ITEMS GRID ── */
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 18px;
+        }
+
+        /* ── ITEM CARD ── */
+        .item-card {
+            background: var(--card);
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            position: relative;
+            animation: fadeUp 0.4s ease both;
+        }
+        .item-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(108,99,255,0.12);
+            border-color: var(--primary);
+        }
+        .item-card.owned {
+            opacity: 0.7;
+        }
+        .item-card.owned:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: var(--border);
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Staggered animation delays */
+        .item-card:nth-child(1) { animation-delay: 0.05s; }
+        .item-card:nth-child(2) { animation-delay: 0.1s; }
+        .item-card:nth-child(3) { animation-delay: 0.15s; }
+        .item-card:nth-child(4) { animation-delay: 0.2s; }
+        .item-card:nth-child(5) { animation-delay: 0.25s; }
+        .item-card:nth-child(6) { animation-delay: 0.3s; }
+
+        /* ── OWNED RIBBON ── */
+        .owned-ribbon {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #10b981;
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── ITEM PREVIEW ── */
+        .item-preview {
+            height: 130px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Preview backgrounds per type */
+        .preview-frame   { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
+        .preview-badge   { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+        .preview-coupon  { background: linear-gradient(135deg, #dcfce7, #bbf7d0); }
+        .preview-boost   { background: linear-gradient(135deg, #fce7f3, #fbcfe8); }
+
+        .dark .preview-frame  { background: linear-gradient(135deg, #2e1065, #1e1b4b); }
+        .dark .preview-badge  { background: linear-gradient(135deg, #451a03, #78350f); }
+        .dark .preview-coupon { background: linear-gradient(135deg, #052e16, #14532d); }
+        .dark .preview-boost  { background: linear-gradient(135deg, #500724, #831843); }
+
+        .item-preview .preview-emoji {
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
+            transition: transform 0.2s;
+        }
+        .item-card:hover .preview-emoji { transform: scale(1.12) rotate(-3deg); }
+
+        /* ── ITEM INFO ── */
+        .item-info { padding: 14px 16px 16px; }
+
+        .item-type-tag {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 6px;
+        }
+        .tag-frame  { background: #ede9fe; color: #6c63ff; }
+        .tag-badge  { background: #fef3c7; color: #d97706; }
+        .tag-coupon { background: #dcfce7; color: #059669; }
+        .tag-boost  { background: #fce7f3; color: #db2777; }
+        .dark .tag-frame  { background: #2e1065; color: #a78bfa; }
+        .dark .tag-badge  { background: #451a03; color: #fbbf24; }
+        .dark .tag-coupon { background: #052e16; color: #34d399; }
+        .dark .tag-boost  { background: #500724; color: #f472b6; }
+
+        .item-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+            letter-spacing: -0.2px;
+        }
+
+        .item-desc {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            line-height: 1.4;
+            margin-bottom: 14px;
+        }
+
+        .item-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .item-price {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 800;
+            font-size: 1rem;
+            color: #d97706;
+        }
+        .item-price .price-coin { font-size: 1.1rem; }
+
+        .buy-btn {
+            padding: 7px 18px;
+            border-radius: 20px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.18s;
+            box-shadow: 0 3px 10px rgba(108,99,255,0.3);
+        }
+        .buy-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.04);
+        }
+        .buy-btn:disabled, .buy-btn.cant-afford {
+            background: var(--border);
+            color: var(--text-light);
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        .buy-btn.owned-btn {
+            background: #10b981;
+            box-shadow: 0 3px 10px rgba(16,185,129,0.25);
+            cursor: default;
+        }
+        .buy-btn.owned-btn:hover { transform: none; }
+
+        /* ── CONFIRM MODAL ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .modal-overlay.open { display: flex; }
+
+        .confirm-modal {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 28px 24px;
+            max-width: 360px;
+            width: 100%;
+            text-align: center;
+            animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        @keyframes popIn {
+            from { transform: scale(0.85); opacity: 0; }
+            to   { transform: scale(1);    opacity: 1; }
+        }
+
+        .modal-item-preview {
+            width: 80px; height: 80px;
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 16px;
+        }
+        .modal-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+        .modal-desc {
+            font-size: 0.82rem;
+            color: var(--text-light);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .modal-cost {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #fef3c7;
+            color: #d97706;
+            font-weight: 800;
+            font-size: 1.1rem;
+            padding: 8px 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        .dark .modal-cost { background: #451a03; color: #fbbf24; }
+
+        .modal-btns {
+            display: flex;
+            gap: 10px;
+        }
+        .modal-cancel {
+            flex: 1;
+            padding: 11px;
+            border-radius: 14px;
+            border: 1.5px solid var(--border);
+            background: transparent;
+            color: var(--text-light);
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+        .modal-cancel:hover { border-color: var(--primary); color: var(--primary); }
+        .modal-confirm {
+            flex: 1;
+            padding: 11px;
+            border-radius: 14px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+            box-shadow: 0 4px 14px rgba(108,99,255,0.35);
+        }
+        .modal-confirm:hover { background: var(--primary-dark); }
+
+        /* ── SUCCESS TOAST ── */
+        .toast {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #10b981;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            box-shadow: 0 8px 24px rgba(16,185,129,0.35);
+            z-index: 2000;
+            transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+            white-space: nowrap;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.error { background: var(--danger); box-shadow: 0 8px 24px rgba(239,68,68,0.35); }
+
+        /* ── EMPTY STATE ── */
+        .empty-store {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+        .empty-store .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+        .empty-store p { font-size: 0.88rem; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 600px) {
+            .items-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .store-hero-title { font-size: 1.4rem; }
+            .balance-amount { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="navbar">
+    <h2 onclick="navigate('index.html')">SkillSwap</h2>
+    <div class="nav-right">
+        <div class="coin-nav-badge">
+            <span class="coin-icon">🪙</span>
+            <span id="navCoinCount">—</span>
+        </div>
+        <button class="nav-icon-btn" onclick="navigate('index.html')" title="Home">🏠</button>
+        <button class="nav-icon-btn" onclick="navigate('profile.html')" title="Profile">👤</button>
+        <button class="mode-btn" id="modeBtn" onclick="toggleMode()">🌙</button>
+    </div>
+</div>
+
+<!-- Hero -->
+<div class="store-hero">
+    <div class="store-hero-title">🛍️ SkillSwap Store</div>
+    <div class="store-hero-sub">Spend your coins on exclusive frames, badges & more</div>
+    <div class="balance-card">
+        <div class="balance-coin-icon">🪙</div>
+        <div class="balance-info">
+            <div class="balance-label">Your Balance</div>
+            <div class="balance-amount" id="balanceAmount">—</div>
+        </div>
+    </div>
+    <div class="earn-hint">
+        Earn coins by <span>completing sessions +50</span> <span>5★ rating +20</span>
+    </div>
+</div>
+
+<!-- Store content -->
+<div class="store-content">
+
+    <!-- Category tabs -->
+    <div class="category-tabs">
+        <button class="cat-tab active" onclick="filterCategory('all')" data-cat="all">✨ All</button>
+        <button class="cat-tab" onclick="filterCategory('frame')" data-cat="frame">🖼️ Frames</button>
+        <button class="cat-tab" onclick="filterCategory('badge')" data-cat="badge">🏅 Badges</button>
+        <button class="cat-tab" onclick="filterCategory('coupon')" data-cat="coupon">🎟️ Coupons</button>
+        <button class="cat-tab" onclick="filterCategory('boost')" data-cat="boost">🚀 Boosts</button>
+    </div>
+
+    <!-- Items grid -->
+    <div class="items-grid" id="itemsGrid">
+        <!-- Populated by JS -->
+    </div>
+
+</div>
+
+<!-- Confirm modal -->
+<div class="modal-overlay" id="confirmModal">
+    <div class="confirm-modal">
+        <div class="modal-item-preview" id="modalPreview"></div>
+        <div class="modal-title" id="modalTitle"></div>
+        <div class="modal-desc" id="modalDesc"></div>
+        <div class="modal-cost">
+            🪙 <span id="modalCost"></span> coins
+        </div>
+        <div class="modal-btns">
+            <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+            <button class="modal-confirm" onclick="confirmBuy()">Buy Now</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+    const API   = "http://localhost:8080";
+    const token = localStorage.getItem("token");
+    const currentUserId = localStorage.getItem("userId");
+
+    if (!token) { location.href = "login.html"; }
+
+    function navigate(url) {
+        sessionStorage.setItem('navigating', 'true');
+        location.href = url;
+    }
+
+    // ── Dark mode ──
+    const modeBtn = document.getElementById("modeBtn");
+    if (localStorage.getItem("mode") === "dark") {
+        document.body.classList.add("dark");
+        modeBtn.innerText = "☀️";
+    }
+    function toggleMode() {
+        document.body.classList.toggle("dark");
+        const dark = document.body.classList.contains("dark");
+        localStorage.setItem("mode", dark ? "dark" : "light");
+        modeBtn.innerText = dark ? "☀️" : "🌙";
+    }
+
+    function authHeaders() {
+        return { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" };
+    }
+
+    // ── Store items (static until backend ready) ──
+    const STORE_ITEMS = [
+        {
+            id: 1, type: 'frame', name: 'Gold Frame',
+            desc: 'A shimmering gold border around your profile avatar.',
+            emoji: '🟡', price: 200
+        },
+        {
+            id: 2, type: 'frame', name: 'Diamond Frame',
+            desc: 'Ultra-rare diamond frame — flex on everyone.',
+            emoji: '💎', price: 500
+        },
+        {
+            id: 3, type: 'frame', name: 'Fire Frame',
+            desc: 'Blazing animated frame for top contributors.',
+            emoji: '🔥', price: 350
+        },
+        {
+            id: 4, type: 'badge', name: 'Top Teacher',
+            desc: 'Awarded to the best skill teachers on the platform.',
+            emoji: '🏆', price: 300
+        },
+        {
+            id: 5, type: 'badge', name: 'Expert Badge',
+            desc: 'Show off your expertise in your chosen field.',
+            emoji: '⭐', price: 150
+        },
+        {
+            id: 6, type: 'badge', name: 'Early Adopter',
+            desc: 'Limited badge for the first wave of SkillSwap users.',
+            emoji: '🦋', price: 400
+        },
+        {
+            id: 7, type: 'coupon', name: '10% Session Discount',
+            desc: 'Get 10% off your next skill session booking.',
+            emoji: '🎟️', price: 100
+        },
+        {
+            id: 8, type: 'coupon', name: 'Free Session Pass',
+            desc: 'Redeem one completely free skill session.',
+            emoji: '🎫', price: 600
+        },
+        {
+            id: 9, type: 'boost', name: 'Profile Boost 24h',
+            desc: 'Pin your profile to the top of search results for 24 hours.',
+            emoji: '🚀', price: 250
+        },
+        {
+            id: 10, type: 'boost', name: 'Skill Spotlight',
+            desc: 'Feature one of your skills on the homepage for 48 hours.',
+            emoji: '✨', price: 400
+        },
+        {
+            id: 11, type: 'boost', name: 'Double XP Weekend',
+            desc: 'Earn 2× coins from all sessions for 48 hours.',
+            emoji: '⚡', price: 350
+        },
+        {
+            id: 12, type: 'frame', name: 'Galaxy Frame',
+            desc: 'A cosmic swirling galaxy frame for dreamers.',
+            emoji: '🌌', price: 450
+        },
+    ];
+
+    let userBalance  = 0;
+    let ownedItems   = new Set(); // ids
+    let currentCategory = 'all';
+    let pendingItem  = null;
+
+    // ── Load balance from backend (fallback to 0) ──
+    async function loadBalance() {
+        try {
+            const res = await fetch(`${API}/api/coins/balance`, { headers: authHeaders() });
+            if (res.ok) {
+                const data = await res.json();
+                userBalance = data.balance ?? data ?? 0;
+            }
+        } catch (e) {
+            // Backend not ready — use 0
+            userBalance = 0;
+        }
+        document.getElementById("balanceAmount").textContent = userBalance;
+        document.getElementById("navCoinCount").textContent  = userBalance;
+    }
+
+    // ── Load owned items from backend ──
+    async function loadInventory() {
+        try {
+            const res = await fetch(`${API}/api/store/inventory`, { headers: authHeaders() });
+            if (res.ok) {
+                const items = await res.json();
+                ownedItems = new Set(items.map(i => i.itemId ?? i.id));
+            }
+        } catch (e) { /* not ready yet */ }
+    }
+
+    // ── Render items ──
+    function renderItems() {
+        const grid = document.getElementById("itemsGrid");
+        const filtered = currentCategory === 'all'
+            ? STORE_ITEMS
+            : STORE_ITEMS.filter(i => i.type === currentCategory);
+
+        if (!filtered.length) {
+            grid.innerHTML = `<div class="empty-store" style="grid-column:1/-1">
+                <div class="empty-icon">🛒</div>
+                <p>No items in this category yet</p>
+            </div>`;
+            return;
+        }
+
+        grid.innerHTML = filtered.map((item, idx) => {
+            const owned      = ownedItems.has(item.id);
+            const cantAfford = !owned && userBalance < item.price;
+
+            return `
+            <div class="item-card ${owned ? 'owned' : ''}" style="animation-delay:${idx * 0.05}s">
+                ${owned ? '<div class="owned-ribbon">✓ Owned</div>' : ''}
+                <div class="item-preview preview-${item.type}">
+                    <span class="preview-emoji">${item.emoji}</span>
+                </div>
+                <div class="item-info">
+                    <div class="item-type-tag tag-${item.type}">${item.type}</div>
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-desc">${item.desc}</div>
+                    <div class="item-footer">
+                        <div class="item-price">
+                            <span class="price-coin">🪙</span>
+                            ${item.price}
+                        </div>
+                        ${owned
+                ? `<button class="buy-btn owned-btn">✓ Owned</button>`
+                : `<button
+                                class="buy-btn ${cantAfford ? 'cant-afford' : ''}"
+                                onclick="openBuyModal(${item.id})"
+                                ${cantAfford ? 'disabled title="Not enough coins"' : ''}>
+                                ${cantAfford ? 'Need more 🪙' : 'Buy'}
+                               </button>`
+            }
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ── Category filter ──
+    function filterCategory(cat) {
+        currentCategory = cat;
+        document.querySelectorAll('.cat-tab').forEach(t => {
+            t.classList.toggle('active', t.dataset.cat === cat);
+        });
+        renderItems();
+    }
+
+    // ── Buy modal ──
+    function openBuyModal(itemId) {
+        const item = STORE_ITEMS.find(i => i.id === itemId);
+        if (!item) return;
+        pendingItem = item;
+
+        const previewEl = document.getElementById("modalPreview");
+        previewEl.className = `modal-item-preview preview-${item.type}`;
+        previewEl.textContent = item.emoji;
+
+        document.getElementById("modalTitle").textContent = item.name;
+        document.getElementById("modalDesc").textContent  = item.desc;
+        document.getElementById("modalCost").textContent  = item.price;
+
+        document.getElementById("confirmModal").classList.add("open");
+    }
+
+    function closeModal() {
+        document.getElementById("confirmModal").classList.remove("open");
+        pendingItem = null;
+    }
+
+    async function confirmBuy() {
+        if (!pendingItem) return;
+
+        const confirmBtn = document.querySelector(".modal-confirm");
+        confirmBtn.disabled  = true;
+        confirmBtn.textContent = "Buying...";
+
+        try {
+            const res = await fetch(`${API}/api/store/buy/${pendingItem.id}`, {
+                method: "POST",
+                headers: authHeaders()
+            });
+
+            if (res.ok) {
+                userBalance -= pendingItem.price;
+                ownedItems.add(pendingItem.id);
+                document.getElementById("balanceAmount").textContent = userBalance;
+                document.getElementById("navCoinCount").textContent  = userBalance;
+                closeModal();
+                renderItems();
+                showToast(`✅ ${pendingItem.name} purchased!`);
+            } else if (res.status === 400) {
+                showToast("❌ Not enough coins!", true);
+                closeModal();
+            } else {
+                // Backend not ready — simulate purchase
+                userBalance -= pendingItem.price;
+                ownedItems.add(pendingItem.id);
+                document.getElementById("balanceAmount").textContent = userBalance;
+                document.getElementById("navCoinCount").textContent  = userBalance;
+                closeModal();
+                renderItems();
+                showToast(`✅ ${pendingItem.name} purchased! (demo)`);
+            }
+        } catch (e) {
+            // Simulate for demo
+            userBalance -= pendingItem.price;
+            ownedItems.add(pendingItem.id);
+            document.getElementById("balanceAmount").textContent = userBalance;
+            document.getElementById("navCoinCount").textContent  = userBalance;
+            closeModal();
+            renderItems();
+            showToast(`✅ ${pendingItem.name} purchased! (demo)`);
+        }
+
+        confirmBtn.disabled   = false;
+        confirmBtn.textContent = "Buy Now";
+    }
+
+    // ── Toast ──
+    function showToast(msg, isError = false) {
+        const toast = document.getElementById("toast");
+        toast.textContent = msg;
+        toast.className   = `toast${isError ? ' error' : ''}`;
+        setTimeout(() => toast.classList.add("show"), 10);
+        setTimeout(() => toast.classList.remove("show"), 3000);
+    }
+
+    // ── Close modal on overlay click ──
+    document.getElementById("confirmModal").addEventListener("click", function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    // ── Cleanup ──
+    window.addEventListener('beforeunload', () => {
+        const navigating = sessionStorage.getItem('navigating');
+        if (currentUserId && !navigating) {
+            navigator.sendBeacon(`${API}/presence/offline/${currentUserId}`);
+        }
+        sessionStorage.removeItem('navigating');
+    });
+
+    // ── Init ──
+    async function init() {
+        await loadBalance();
+        await loadInventory();
+        renderItems();
+    }
+
+    init();
+</script>
+<script src="main.js"></script>
+</body>
+</html>
