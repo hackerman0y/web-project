@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Details - SkillSwap</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .details-container {
+            max-width: 750px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .details-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            box-shadow: var(--shadow-md);
+            text-align: center;
+        }
+
+        .details-card h2 {
+            margin-bottom: 12px;
+            font-size: 1.6rem;
+            color: var(--text);
+        }
+
+        .meta {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .category {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .description {
+            margin: 14px 0;
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        .swap-info {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 14px 0;
+        }
+
+        .swap-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+        }
+        .swap-pill span { color: var(--text-light); }
+
+        .popularity { margin-top: 10px; font-size: 0.9rem; }
+
+        .actions {
+            margin-top: 22px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .like-btn {
+            padding: 10px 28px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #ff4d6d, #ff758f);
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .like-btn:hover:not(:disabled) { opacity: 0.9; transform: scale(0.97); }
+        .like-btn:disabled { background: var(--border); color: var(--text-light); cursor: not-allowed; }
+
+        .chat-btn {
+            padding: 10px 28px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            font-size: 0.9rem;
+            box-shadow: 0 4px 14px rgba(108,99,255,0.3);
+            transition: 0.2s;
+        }
+        .chat-btn:hover { opacity: 0.9; }
+
+        .user-info-detail {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .detail-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .user-name-detail { font-weight: 700; font-size: 1rem; color: var(--text); }
+        .online-status { font-size: 0.8rem; color: var(--text-light); margin-top: 2px; }
+
+        @media (max-width: 480px) {
+            .details-container { margin: 20px auto; padding: 12px; }
+            .details-card { padding: 20px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="navbar-root"></div>
+
+<div class="details-container">
+    <div class="details-card" id="details">
+        <p style="color:var(--text-light);">Loading...</p>
+    </div>
+</div>
+
+<footer>SkillSwap &copy; 2025 — Trade skills, not money 💜</footer>
+
+<script src="nav.js"></script>
+<script>
+    const currentUserId = localStorage.getItem("userId");
+    const params = new URLSearchParams(window.location.search);
+    const skillId = params.get("id");
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+    }
+
+    function isAlreadyLiked(id) {
+        const liked = JSON.parse(localStorage.getItem(`likedSkills_${currentUserId}`) || "[]");
+        return liked.includes(id);
+    }
+
+    function markAsLiked(id) {
+        const liked = JSON.parse(localStorage.getItem(`likedSkills_${currentUserId}`) || "[]");
+        if (!liked.includes(id)) {
+            liked.push(id);
+            localStorage.setItem(`likedSkills_${currentUserId}`, JSON.stringify(liked));
+        }
+    }
+
+    const container = document.getElementById("details");
+
+    if (!skillId) {
+        container.innerHTML = "<h3>Invalid skill</h3>";
+    } else {
+        fetch(`Skill.php?id=${skillId}`)
+            .then(res => {
+                if (!res.ok) throw new Error();
+                return res.json();
+            })
+            .then(skill => {
+                const username   = skill.username || "Unknown";
+                const isOwn      = String(skill.user_id) === String(currentUserId);
+                const alreadyLiked = isAlreadyLiked(skill.id);
+
+                container.innerHTML = `
+                    <h2>${escapeHtml(skill.name)}</h2>
+
+                    <div class="meta">
+                        <span class="category">#${escapeHtml(skill.category || 'General')}</span>
+                        <span class="type-badge ${skill.type === 'teach' ? 'type-teach' : 'type-learn'}">
+                            ${skill.type === 'teach' ? '📖 TEACH' : '📚 LEARN'}
+                        </span>
+                    </div>
+
+                    ${skill.description
+                        ? `<p class="description">${escapeHtml(skill.description)}</p>`
+                        : ''}
+
+                    ${(skill.skill_to_teach || skill.skill_to_learn) ? `
+                    <div class="swap-info">
+                        ${skill.skill_to_teach ? `
+                        <div class="swap-pill">
+                            📖 <span>Teaches:</span> <strong>${escapeHtml(skill.skill_to_teach)}</strong>
+                        </div>` : ''}
+                        ${skill.skill_to_learn ? `
+                        <div class="swap-pill">
+                            📚 <span>Wants to learn:</span> <strong>${escapeHtml(skill.skill_to_learn)}</strong>
+                        </div>` : ''}
+                    </div>` : ''}
+
+                    <div class="popularity">🔥 Popularity: <span id="popCount">${skill.popularity || 0}</span></div>
+
+                    <div class="actions">
+                        <button class="like-btn" id="likeBtn"
+                            onclick="likeSkill(${skill.id})"
+                            ${alreadyLiked || isOwn ? 'disabled' : ''}>
+                            ${alreadyLiked ? '❤️ Liked' : isOwn ? '❤️ Your skill' : '🤍 Like'}
+                        </button>
+                        ${!isOwn && skill.user_id ? `
+                        <button class="chat-btn"
+                            onclick="navigate('chat.html?userId=${skill.user_id}&username=${encodeURIComponent(username)}')">
+                            💬 Chat with ${escapeHtml(username)}
+                        </button>` : ''}
+                    </div>
+
+                    <div class="user-info-detail">
+                        <div class="detail-avatar">${(username.charAt(0) || 'U').toUpperCase()}</div>
+                        <div>
+                            <div class="user-name-detail">${escapeHtml(username)}</div>
+                            <div class="online-status">${skill.online ? '🟢 Online' : '⚫ Offline'}</div>
+                        </div>
+                    </div>
+                `;
+            })
+            .catch(() => {
+                container.innerHTML = "<h3>Skill not found</h3>";
+            });
+    }
+
+    async function likeSkill(id) {
+        const token = localStorage.getItem("token");
+        if (!token) { alert("Please login to like!"); navigate("login.html"); return; }
+        if (isAlreadyLiked(id)) { alert("You already liked this! ❤️"); return; }
+
+        try {
+            const res = await fetch(`Skill.php?id=${id}&increase=1`, { method: "PUT" });
+            if (res.ok) {
+                const updated = await res.json();
+                document.getElementById("popCount").textContent = updated.popularity || 0;
+                markAsLiked(id);
+                const btn = document.getElementById("likeBtn");
+                btn.textContent = "❤️ Liked";
+                btn.disabled = true;
+            }
+        } catch(e) {
+            console.error("like failed", e);
+        }
+    }
+
+    initNav("");
+</script>
+</body>
+</html>

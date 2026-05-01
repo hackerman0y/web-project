@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - SkillSwap</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="navbar-root"></div>
+
+<div class="profile-container">
+    <div class="avatar">👤</div>
+    <h2 id="username">Loading...</h2>
+    <p id="email" class="email-text"></p>
+    <p id="status" class="status-text"></p>
+    <div id="skillsList" class="skills-list"></div>
+    <br>
+    <button class="btn-logout" onclick="logout()">🚪 Logout</button>
+</div>
+
+<footer>SkillSwap &copy; 2025 — Trade skills, not money 💜</footer>
+
+<script src="nav.js"></script>
+<script>
+    const userId = localStorage.getItem("userId");
+    const token  = localStorage.getItem("token");
+
+    // redirect to login if not logged in
+    if (!token) navigate("login.html");
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+    }
+
+    async function loadProfile() {
+        try {
+            const userRes = await fetch("Users.php?action=me");
+            if (!userRes.ok) { navigate("login.html"); return; }
+
+            const user = await userRes.json();
+            document.getElementById("username").innerText = user.username || "No name";
+            document.getElementById("email").innerText    = user.email || "";
+            document.getElementById("status").innerHTML   = user.online ? "🟢 Online" : "⚫ Offline";
+
+            const skillsRes = await fetch(`Skill.php?user_id=${user.id}`);
+            if (!skillsRes.ok) throw new Error();
+
+            const skills = await skillsRes.json();
+            const list   = document.getElementById("skillsList");
+
+            if (!skills.length) {
+                list.innerHTML = "<p class='no-skills'>No skills yet</p>";
+                return;
+            }
+
+            list.innerHTML = "<h3>My Skills</h3>" + skills.map(s => `
+                <div class="skill-item">
+                    <b>${escapeHtml(s.name)}</b> — ${escapeHtml(s.category || "")}
+                    <span class="skill-type-badge ${s.type === 'teach' ? 'badge-teach' : 'badge-learn'}">
+                        ${s.type}
+                    </span>
+                    <p>${escapeHtml(s.description || "")}</p>
+                    <small>🔥 ${s.popularity || 0}</small>
+                </div>
+            `).join("");
+
+        } catch(e) {
+            document.getElementById("skillsList").innerHTML = "<p>Could not load skills</p>";
+        }
+    }
+
+    async function logout() {
+        if (userId) navigator.sendBeacon(`User_list.php?offline=${userId}`);
+        try {
+            await fetch("Users.php?action=logout", { method: "POST" });
+        } catch(_) {}
+        localStorage.clear();
+        navigate("login.html");
+    }
+
+    initNav("profile");
+    loadProfile();
+</script>
+</body>
+</html>
