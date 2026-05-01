@@ -2,58 +2,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>🔄SkillSwap</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillSwap</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="navbar">
-    <h2 class="logo" onclick="navigate('index.html')">
-        <span class="logo-icon">🔄</span>
-        <span class="logo-text">SkillSwap</span>
-    </h2>
-    <div class="nav-right">
-        <div class="coin-nav-badge" onclick="navigate('Store.html')" style="cursor:pointer; display:flex; align-items:center; gap:6px; background:linear-gradient(135deg,#f59e0b,#d97706); color:white; padding:6px 14px; border-radius:20px; font-size:0.82rem; font-weight:700;">
-            🪙 <span id="navCoinCount">0</span>
-        </div>
-        <span onclick="navigate('about.html')" style="cursor:pointer; font-size:0.85rem; font-weight:600; color:var(--text-light);" title="About Us">About</span>
-        <span onclick="navigate('contact.html')" style="cursor:pointer; font-size:0.85rem; font-weight:600; color:var(--text-light);" title="Contact Us">Contact</span>
-        <span onclick="navigate('chat-list.html')" style="cursor:pointer;" title="Messages">💬</span>
-        <span onclick="navigate('notifications.html')" style="cursor:pointer;" title="Notifications">🔔</span>
-        <span onclick="toggleFilters()" style="cursor:pointer;">⚙️</span>
-        <div id="filtersBox" class="filters-box">
-            <select id="catFilter">
-                <option value="">All</option>
-                <option>Programming</option>
-                <option>Design</option>
-                <option>Business</option>
-                <option>Language</option>
-                <option>Fitness</option>
-            </select>
-            <select id="sortFilter">
-                <option value="">Sort</option>
-                <option value="az">A-Z</option>
-                <option value="za">Z-A</option>
-                <option value="pop">🔥 Popular</option>
-            </select>
-        </div>
-        <span id="navUser"></span>
-        <span onclick="navigate('profile.html')" style="cursor:pointer;">👤</span>
-        <button class="mode-btn" id="modeBtn" onclick="toggleMode()">🌙</button>
-    </div>
-</div>
+<div id="navbar-root"></div>
 
 <div class="controls">
     <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search skill...">
     <button class="add-btn" onclick="openModal()">+ Add</button>
+    <span onclick="toggleFilters()" style="cursor:pointer;font-size:1.2rem;" title="Filters">⚙️</span>
+    <div id="filtersBox" class="filters-box">
+        <select id="catFilter">
+            <option value="">All Categories</option>
+            <option>Programming</option>
+            <option>Design</option>
+            <option>Business</option>
+            <option>Language</option>
+            <option>Fitness</option>
+        </select>
+        <select id="sortFilter">
+            <option value="">Sort by</option>
+            <option value="az">A-Z</option>
+            <option value="za">Z-A</option>
+            <option value="pop">🔥 Popular</option>
+        </select>
+    </div>
 </div>
 
 <div class="skills-grid" id="skillsContainer"></div>
 
+<!-- add / edit skill modal -->
 <div class="modal" id="modal">
     <div class="modal-content">
         <h3>✨ New Skill</h3>
-        <input id="name" placeholder="Skill name">
+        <input id="name" placeholder="Skill name (e.g. Python, Guitar)">
         <select id="cat">
             <option value="">Category</option>
             <option>Programming</option>
@@ -69,6 +54,8 @@
             <option value="teach">📖 Teach</option>
             <option value="learn">📚 Learn</option>
         </select>
+        <input id="skillToTeach" placeholder="📖 What can you teach?">
+        <input id="skillToLearn" placeholder="📚 What do you want to learn?">
         <div class="modal-buttons">
             <button class="cancel-btn" onclick="resetForm()">Cancel</button>
             <button class="submit-btn" id="addBtn" onclick="addSkill()">Save</button>
@@ -76,52 +63,34 @@
     </div>
 </div>
 
+<button class="view-toggle-btn" id="viewToggleBtn" onclick="toggleView()" data-tip="Mobile view">📱</button>
+
+<footer>SkillSwap &copy; 2025 — Trade skills, not money 💜</footer>
+
+<script src="nav.js"></script>
 <script>
-    const API = "http://localhost:8080";
+    const API = "";
 
-    function navigate(url) {
-        sessionStorage.setItem('navigating', 'true');
-        location.href = url;
-    }
+    const search     = document.getElementById("searchInput");
+    const catFilter  = document.getElementById("catFilter");
+    const sortFilter = document.getElementById("sortFilter");
+    const filtersBox = document.getElementById("filtersBox");
+    const nameInput  = document.getElementById("name");
+    const cat        = document.getElementById("cat");
+    const desc       = document.getElementById("desc");
+    const type       = document.getElementById("type");
+    const otherCat   = document.getElementById("otherCategory");
+    const modal      = document.getElementById("modal");
 
-    const modeBtn = document.getElementById("modeBtn");
-    if (localStorage.getItem("mode") === "dark") {
-        document.body.classList.add("dark");
-        modeBtn.innerText = "☀️";
-    }
-    function toggleMode() {
-        document.body.classList.toggle("dark");
-        const dark = document.body.classList.contains("dark");
-        localStorage.setItem("mode", dark ? "dark" : "light");
-        modeBtn.innerText = dark ? "☀️" : "🌙";
-    }
+    let allSkills = [];
+    let editingId = null;
 
-    const modal         = document.getElementById("modal");
-    const search        = document.getElementById("searchInput");
-    const catFilter     = document.getElementById("catFilter");
-    const sortFilter    = document.getElementById("sortFilter");
-    const filtersBox    = document.getElementById("filtersBox");
-    const nameInput     = document.getElementById("name");
-    const cat           = document.getElementById("cat");
-    const desc          = document.getElementById("desc");
-    const type          = document.getElementById("type");
-    const otherCategory = document.getElementById("otherCategory");
-
-    let allSkills  = [];
-    let editingId  = null;
-
-    function getToken()      { return localStorage.getItem("token"); }
+    function getToken()   { return localStorage.getItem("token"); }
     function getCurrentUser() {
         const userId   = localStorage.getItem("userId");
         const username = localStorage.getItem("username");
         if (!userId) return null;
         return { id: parseInt(userId), username };
-    }
-    function authHeaders() {
-        return {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${getToken()}`
-        };
     }
     function escapeHtml(str) {
         if (!str) return '';
@@ -133,33 +102,19 @@
             localStorage.removeItem("token");
             localStorage.removeItem("userId");
             localStorage.removeItem("username");
-            location.href = "login.html";
+            navigate("login.html");
             return true;
         }
         return false;
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        sessionStorage.removeItem('navigating');
-        loadSkills();
-        loadUser();
-    });
-
-    window.addEventListener('beforeunload', () => {
-        const userId     = localStorage.getItem('userId');
-        const navigating = sessionStorage.getItem('navigating');
-        if (userId && !navigating) {
-            navigator.sendBeacon(`${API}/presence/offline/${userId}`);
-        }
-    });
-
     async function loadSkills() {
         try {
-            const res = await fetch(`${API}/api/skills`);
+            const res = await fetch("Skill.php");
             if (!res.ok) throw new Error();
             allSkills = await res.json();
             updateDisplay();
-        } catch (e) {
+        } catch(e) {
             document.getElementById("skillsContainer").innerHTML =
                 `<div class="empty-state">⚠️ Could not load skills. Is the server running?</div>`;
         }
@@ -170,8 +125,7 @@
         const q = search.value.toLowerCase();
         if (q) filtered = filtered.filter(x => x.name.toLowerCase().includes(q));
         if (catFilter.value) {
-            filtered = filtered.filter(x =>
-                x.category?.toLowerCase() === catFilter.value.toLowerCase());
+            filtered = filtered.filter(x => x.category?.toLowerCase() === catFilter.value.toLowerCase());
         }
         if (sortFilter.value === "az") filtered.sort((a, b) => a.name.localeCompare(b.name));
         if (sortFilter.value === "za") filtered.sort((a, b) => b.name.localeCompare(a.name));
@@ -186,25 +140,37 @@
             return;
         }
         const currentUser = getCurrentUser();
+        const userId      = localStorage.getItem("userId");
+        const likedSkills = JSON.parse(localStorage.getItem(`likedSkills_${userId}`) || "[]");
+
         container.innerHTML = skills.map(skill => {
-            const user     = skill.user || {};
-            const username = user.username || "Unknown";
-            const isOwner  = currentUser && (skill.user?.id === currentUser.id);
+            const username = skill.username || "Unknown";
+            const isOwner  = currentUser && (String(skill.user_id) === String(currentUser.id));
+            const isLiked  = likedSkills.includes(skill.id);
+
             return `
             <div class="skill-card" onclick="navigate('details.html?id=${skill.id}')">
                 <div class="skill-name">${escapeHtml(skill.name)}</div>
                 <div class="skill-category">#${escapeHtml(skill.category || "General")}</div>
                 ${skill.description
-                ? `<div class="skill-description">${escapeHtml(skill.description)}</div>`
-                : ''}
+                    ? `<div class="skill-description">${escapeHtml(skill.description)}</div>`
+                    : ''}
+                ${skill.skill_to_teach
+                    ? `<div style="font-size:0.75rem;margin:4px 0;color:var(--text-light);">
+                           📖 Teaches: <strong style="color:var(--text)">${escapeHtml(skill.skill_to_teach)}</strong>
+                       </div>` : ''}
+                ${skill.skill_to_learn
+                    ? `<div style="font-size:0.75rem;margin:4px 0;color:var(--text-light);">
+                           📚 Wants: <strong style="color:var(--text)">${escapeHtml(skill.skill_to_learn)}</strong>
+                       </div>` : ''}
                 <div class="user-row">
                     <div class="user-info">
                         <div class="user-avatar">${(username.charAt(0) || "U").toUpperCase()}</div>
                         <div>
                             <div class="user-name">${escapeHtml(username)}</div>
                             <div>
-                                <span class="online-dot ${user.online ? 'online' : 'offline'}"></span>
-                                <span style="font-size:0.65rem;">${user.online ? 'Online' : 'Offline'}</span>
+                                <span class="online-dot ${skill.online ? 'online' : 'offline'}"></span>
+                                <span style="font-size:0.65rem;">${skill.online ? 'Online' : 'Offline'}</span>
                             </div>
                         </div>
                     </div>
@@ -215,13 +181,13 @@
                 <div class="card-footer">
                     <div class="popularity">🔥 ${skill.popularity || 0}</div>
                     <div class="action-group">
-                        <button class="action-btn"
-                            onclick="event.stopPropagation(); increasePopularity(${skill.id})">❤️</button>
+                        <button class="action-btn" onclick="event.stopPropagation(); increasePopularity(${skill.id})"
+                            ${isLiked ? 'style="opacity:0.4;cursor:not-allowed;"' : ''}>
+                            ${isLiked ? '❤️' : '🤍'}
+                        </button>
                         ${isOwner ? `
-                        <button class="action-btn"
-                            onclick="event.stopPropagation(); editSkill(${skill.id})">✏️</button>
-                        <button class="action-btn"
-                            onclick="event.stopPropagation(); deleteSkill(${skill.id})">🗑️</button>
+                        <button class="action-btn" onclick="event.stopPropagation(); editSkill(${skill.id})">✏️</button>
+                        <button class="action-btn" onclick="event.stopPropagation(); deleteSkill(${skill.id})">🗑️</button>
                         ` : ''}
                     </div>
                 </div>
@@ -231,31 +197,31 @@
 
     async function addSkill() {
         const currentUser = getCurrentUser();
-        if (!currentUser) { location.href = "login.html"; return; }
+        if (!currentUser) { navigate("login.html"); return; }
 
-        const categoryValue = cat.value === "Other"
-            ? otherCategory.value.trim()
-            : cat.value;
+        const categoryValue = cat.value === "Other" ? otherCat.value.trim() : cat.value;
         if (!nameInput.value.trim()) { alert("Enter skill name"); return; }
 
         const skill = {
-            name:        nameInput.value.trim(),
-            category:    categoryValue,
-            description: desc.value.trim(),
-            type:        type.value
+            name:         nameInput.value.trim(),
+            category:     categoryValue,
+            description:  desc.value.trim(),
+            type:         type.value,
+            skillToTeach: document.getElementById("skillToTeach").value.trim(),
+            skillToLearn: document.getElementById("skillToLearn").value.trim()
         };
 
         const btn = document.getElementById("addBtn");
-        btn.disabled  = true;
+        btn.disabled = true;
         btn.innerText = "Saving...";
 
         try {
-            const url    = editingId ? `${API}/api/skills/${editingId}` : `${API}/api/skills`;
+            const url    = editingId ? `Skill.php?id=${editingId}` : "Skill.php";
             const method = editingId ? "PUT" : "POST";
 
             const res = await fetch(url, {
                 method,
-                headers: authHeaders(),
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(skill)
             });
 
@@ -264,142 +230,122 @@
 
             resetForm();
             await loadSkills();
-        } catch (e) {
-            alert("Connection error. Is the server running?");
+        } catch(e) {
+            alert("Connection error.");
         } finally {
-            btn.disabled  = false;
+            btn.disabled = false;
             btn.innerText = "Save";
         }
     }
 
     async function deleteSkill(id) {
-        if (!getCurrentUser()) { location.href = "login.html"; return; }
+        if (!getCurrentUser()) { navigate("login.html"); return; }
         if (!confirm("Delete this skill?")) return;
         try {
-            const res = await fetch(`${API}/api/skills/${id}`, {
-                method: "DELETE",
-                headers: authHeaders()
-            });
+            const res = await fetch(`Skill.php?id=${id}`, { method: "DELETE" });
             if (handleUnauthorized(res)) return;
-            if (!res.ok) { alert("Could not delete skill"); return; }
+            if (!res.ok) { alert("Could not delete"); return; }
             await loadSkills();
-        } catch (e) {
+        } catch(e) {
             alert("Connection error.");
         }
     }
 
     function editSkill(id) {
-        if (!getCurrentUser()) { location.href = "login.html"; return; }
-        const skill = allSkills.find(s => s.id === id);
+        if (!getCurrentUser()) { navigate("login.html"); return; }
+        const skill = allSkills.find(s => s.id === parseInt(id));
         if (!skill) return;
 
         nameInput.value = skill.name;
         cat.value       = skill.category || "";
         desc.value      = skill.description || "";
         type.value      = skill.type || "teach";
+        document.getElementById("skillToTeach").value = skill.skill_to_teach || "";
+        document.getElementById("skillToLearn").value = skill.skill_to_learn || "";
 
-        if (cat.value === "Other") {
-            otherCategory.style.display = "block";
-            otherCategory.value = skill.category || "";
+        const knownCats = ["Programming","Design","Business","Language","Fitness",""];
+        if (!knownCats.includes(skill.category)) {
+            cat.value = "Other";
+            otherCat.style.display = "block";
+            otherCat.value = skill.category || "";
+        } else {
+            otherCat.style.display = "none";
         }
-        editingId = id;
+
+        editingId = parseInt(id);
         modal.style.display = "flex";
     }
 
     async function increasePopularity(id) {
-        if (!getCurrentUser()) {
-            alert("Please login to like!");
-            location.href = "login.html";
-            return;
-        }
+        if (!getCurrentUser()) { alert("Please login to like!"); navigate("login.html"); return; }
+
+        const userId     = localStorage.getItem("userId");
+        const key        = `likedSkills_${userId}`;
+        const likedSkills = JSON.parse(localStorage.getItem(key) || "[]");
+
+        if (likedSkills.includes(id)) { alert("You already liked this! ❤️"); return; }
+
         try {
-            const res = await fetch(`${API}/api/skills/${id}/increase`, {
-                method: "PUT",
-                headers: authHeaders()
-            });
+            const res = await fetch(`Skill.php?id=${id}&increase=1`, { method: "PUT" });
             if (handleUnauthorized(res)) return;
-            if (res.ok) await loadSkills();
-        } catch (e) {
-            console.error("Like failed", e);
+            if (res.ok) {
+                likedSkills.push(id);
+                localStorage.setItem(key, JSON.stringify(likedSkills));
+                await loadSkills();
+            }
+        } catch(e) {
+            console.error("like failed", e);
         }
     }
 
     function openModal() {
-        if (!getCurrentUser()) {
-            alert("Please login first!");
-            location.href = "login.html";
-            return;
-        }
+        if (!getCurrentUser()) { alert("Please login first!"); navigate("login.html"); return; }
         resetForm();
         modal.style.display = "flex";
     }
 
     function resetForm() {
         modal.style.display = "none";
-        editingId           = null;
-        nameInput.value     = "";
-        cat.value           = "";
-        desc.value          = "";
-        type.value          = "teach";
-        otherCategory.value = "";
-        otherCategory.style.display = "none";
+        editingId = null;
+        nameInput.value = "";
+        cat.value = "";
+        desc.value = "";
+        type.value = "teach";
+        otherCat.value = "";
+        otherCat.style.display = "none";
+        document.getElementById("skillToTeach").value = "";
+        document.getElementById("skillToLearn").value = "";
     }
 
     function toggleFilters() {
-        filtersBox.style.display =
-            filtersBox.style.display === "flex" ? "none" : "flex";
+        filtersBox.style.display = filtersBox.style.display === "flex" ? "none" : "flex";
     }
 
     cat.onchange = () => {
-        otherCategory.style.display = cat.value === "Other" ? "block" : "none";
+        otherCat.style.display = cat.value === "Other" ? "block" : "none";
     };
 
-    function loadUser() {
-        const username = localStorage.getItem("username");
-        if (!username) {
-            document.getElementById("navUser").innerHTML =
-                `<button class="btn" onclick="navigate('login.html')">🔐 Login</button>`;
-        } else {
-            document.getElementById("navUser").innerHTML =
-                `<span style="color:var(--primary); font-weight:bold; cursor:pointer;"
-                       onclick="logout()">👋 ${escapeHtml(username)} (logout)</span>`;
-        }
-    }
-
-    async function logout() {
-        const userId = localStorage.getItem('userId');
-        if (userId) navigator.sendBeacon(`${API}/presence/offline/${userId}`);
-        try {
-            await fetch(`${API}/api/users/logout`, { method: "POST", headers: authHeaders() });
-        } catch (_) {}
-        localStorage.removeItem("token");
-        localStorage.removeItem("userId");
-        localStorage.removeItem("username");
-        localStorage.removeItem("email");
-        location.href = "login.html";
-    }
-
-    search.oninput      = updateDisplay;
-    catFilter.onchange  = updateDisplay;
+    search.oninput     = updateDisplay;
+    catFilter.onchange = updateDisplay;
     sortFilter.onchange = updateDisplay;
 
-    loadSkills();
-    loadUser();
-    async function loadNavCoins() {
-        const t = localStorage.getItem("token");
-        if (!t) return;
-        try {
-            const res = await fetch(`${API}/api/coins/balance`, {
-                headers: { "Authorization": `Bearer ${t}` }
-            });
-            if (!res.ok) return;
-            const data = await res.json();
-            const el = document.getElementById("navCoinCount");
-            if (el) el.textContent = data.balance;
-        } catch(e) {}
+    // mobile / desktop view toggle
+    const viewBtn = document.getElementById("viewToggleBtn");
+    function applyViewMode() {
+        const isMobile = localStorage.getItem("viewMode") === "mobile";
+        document.body.classList.toggle("mobile-view", isMobile);
+        viewBtn.textContent = isMobile ? "🖥️" : "📱";
+        viewBtn.setAttribute("data-tip", isMobile ? "Desktop view" : "Mobile view");
     }
-    loadNavCoins();
+    function toggleView() {
+        const isMobile = localStorage.getItem("viewMode") === "mobile";
+        localStorage.setItem("viewMode", isMobile ? "desktop" : "mobile");
+        applyViewMode();
+    }
+    applyViewMode();
+
+    initNav("home");
+    loadSkills();
 </script>
-<script src="main.js"></script>
 </body>
 </html>
