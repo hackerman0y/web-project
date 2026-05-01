@@ -4,11 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SkillSwap - Login</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+        .form-group input { width: 100%; }
+        .error-msg {
+            color: var(--danger);
+            font-size: 13px;
+            text-align: center;
+            display: none;
+            padding: 8px;
+            border-radius: 8px;
+            background: rgba(239,68,68,0.1);
+        }
+        .success-msg {
+            color: var(--success);
+            font-size: 13px;
+            text-align: center;
+            display: none;
+            padding: 8px;
+            border-radius: 8px;
+            background: rgba(16,185,129,0.1);
+        }
+    </style>
 </head>
 <body>
 
-<div id="navbar-root"></div>
+<nav class="navbar">
+    <h2 class="logo" onclick="navigate('index.html')">
+        <span>🔄</span> SkillSwap
+    </h2>
+    <div class="nav-right">
+        <button class="mode-btn" id="modeBtn" onclick="toggleMode()">🌙</button>
+    </div>
+</nav>
 
 <div class="center">
     <div class="login-card">
@@ -19,18 +53,20 @@
             <button class="tab" onclick="switchTab('register')">Register</button>
         </div>
 
-        <div id="login-form" style="display:flex;flex-direction:column;gap:12px;">
-            <input type="email" id="l-email" placeholder="Email address">
-            <input type="password" id="l-pass" placeholder="Password">
+        <!-- Login Form -->
+        <div id="login-form" class="form-group">
+            <input type="email" id="l-email" placeholder="Email address" />
+            <input type="password" id="l-pass" placeholder="Password" />
             <div class="error-msg" id="login-error"></div>
             <div class="success-msg" id="login-success"></div>
             <button class="btn-main" id="login-btn" onclick="doLogin()">Login</button>
         </div>
 
-        <div id="register-form" style="display:none;flex-direction:column;gap:12px;">
-            <input type="text" id="r-username" placeholder="Username">
-            <input type="email" id="r-email" placeholder="Email address">
-            <input type="password" id="r-pass" placeholder="Password">
+        <!-- Register Form -->
+        <div id="register-form" class="form-group" style="display:none">
+            <input type="text" id="r-username" placeholder="Username" />
+            <input type="email" id="r-email" placeholder="Email address" />
+            <input type="password" id="r-pass" placeholder="Password" />
             <div class="error-msg" id="register-error"></div>
             <div class="success-msg" id="register-success"></div>
             <button class="btn-main" id="register-btn" onclick="doRegister()">Create Account</button>
@@ -43,112 +79,144 @@
 
 <footer>SkillSwap &copy; 2025 — Trade skills, not money 💜</footer>
 
-<script src="nav.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        sessionStorage.removeItem("navigating");
-        initNav("");
+    const API  = 'http://localhost/web/api/users.php';
+     const BASE = 'http://localhost/web';
+
+    function navigate(url) {
+        sessionStorage.setItem('navigating', 'true');
+        location.href = url;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        sessionStorage.removeItem('navigating');
+    });
+
+    window.addEventListener('beforeunload', () => {
+        const userId     = localStorage.getItem('userId');
+        const navigating = sessionStorage.getItem('navigating');
+        if (userId && !navigating) {
+            navigator.sendBeacon(BASE + '/presence/offline/' + userId);
+        }
     });
 
     function switchTab(tab) {
-        document.querySelectorAll(".tab").forEach((t, i) => {
-            t.classList.toggle("active", (i === 0 && tab === "login") || (i === 1 && tab === "register"));
+        document.querySelectorAll('.tab').forEach((t, i) => {
+            t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
         });
-        document.getElementById("login-form").style.display    = tab === "login"    ? "flex" : "none";
-        document.getElementById("register-form").style.display = tab === "register" ? "flex" : "none";
+        document.getElementById('login-form').style.display    = tab === 'login'    ? 'flex' : 'none';
+        document.getElementById('register-form').style.display = tab === 'register' ? 'flex' : 'none';
     }
 
     function showMsg(id, text, type) {
         const el = document.getElementById(id);
         el.textContent = text;
-        el.className = type === "error" ? "error-msg" : "success-msg";
-        el.style.display = "block";
+        el.className   = type === 'error' ? 'error-msg' : 'success-msg';
+        el.style.display = 'block';
     }
-    function hideMsg(id) { document.getElementById(id).style.display = "none"; }
+
+    function hideMsg(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    async function setOnline(token) {
+        try {
+            await fetch(BASE + '/presence/online', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+        } catch (e) {
+            console.error('Could not set online status', e);
+        }
+    }
 
     async function doLogin() {
-        const email    = document.getElementById("l-email").value.trim();
-        const password = document.getElementById("l-pass").value;
-        hideMsg("login-error");
-        hideMsg("login-success");
+        const email    = document.getElementById('l-email').value.trim();
+        const password = document.getElementById('l-pass').value;
+        hideMsg('login-error');
+        hideMsg('login-success');
 
-        if (!email || !password) return showMsg("login-error", "❌ Please fill in all fields", "error");
+        if (!email || !password) return showMsg('login-error', '❌ Please fill in all fields', 'error');
 
-        const btn = document.getElementById("login-btn");
+        const btn = document.getElementById('login-btn');
         btn.disabled = true;
-        btn.textContent = "Logging in...";
+        btn.textContent = 'Logging in...';
 
         try {
-            const res = await fetch("Users.php?action=login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password })
-            });
-
+           const res = await fetch(API + '?action=login', { 
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include', // 🔥 مهم
+    body: JSON.stringify({ email, password })
+});
             if (res.ok) {
                 const data = await res.json();
-                // PHP uses sessions, store basic info for frontend use
-                localStorage.setItem("token",    "php-session");
-                localStorage.setItem("userId",   data.userId);
-                localStorage.setItem("username", data.username);
+                localStorage.setItem('token',    data.token);
+                localStorage.setItem('userId',   data.userId);
+                localStorage.setItem('username', data.username);
 
-                showMsg("login-success", "✅ Login successful! Redirecting...", "success");
-                setTimeout(() => navigate("index.html"), 1500);
+                await setOnline(data.token);
+
+                showMsg('login-success', '✅ Login successful! Redirecting...', 'success');
+
+                setTimeout(() => navigate('index.html'), 1500);
             } else {
-                showMsg("login-error", "❌ Wrong email or password", "error");
+                showMsg('login-error', '❌ Wrong email or password', 'error');
             }
-        } catch(e) {
-            showMsg("login-error", "❌ Cannot connect to server", "error");
+        } catch (e) {
+            showMsg('login-error', '❌ Cannot connect to server', 'error');
         }
 
-        btn.disabled = false;
-        btn.textContent = "Login";
+        btn.disabled    = false;
+        btn.textContent = 'Login';
     }
 
     async function doRegister() {
-        const username = document.getElementById("r-username").value.trim();
-        const email    = document.getElementById("r-email").value.trim();
-        const password = document.getElementById("r-pass").value;
-        hideMsg("register-error");
-        hideMsg("register-success");
+        const username = document.getElementById('r-username').value.trim();
+        const email    = document.getElementById('r-email').value.trim();
+        const password = document.getElementById('r-pass').value;
+        hideMsg('register-error');
+        hideMsg('register-success');
 
         if (!username || !email || !password)
-            return showMsg("register-error", "❌ Please fill in all fields", "error");
+            return showMsg('register-error', '❌ Please fill in all fields', 'error');
 
-        const btn = document.getElementById("register-btn");
-        btn.disabled = true;
-        btn.textContent = "Creating account...";
+        const btn = document.getElementById('register-btn');
+        btn.disabled    = true;
+        btn.textContent = 'Creating account...';
 
         try {
-            const res = await fetch("Users.php?action=register", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
+            const res = await fetch(API + '?action=register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, email, password })
             });
 
             if (res.ok) {
-                showMsg("register-success", "✅ Account created! Please login.", "success");
+                showMsg('register-success', '✅ Account created! Please login.', 'success');
                 setTimeout(() => {
-                    switchTab("login");
-                    document.getElementById("l-email").value = email;
+                    switchTab('login');
+                    document.getElementById('l-email').value = email;
                 }, 1500);
             } else {
-                const data = await res.json().catch(() => ({}));
-                showMsg("register-error", "❌ " + (data.error || "Registration failed"), "error");
+                const text = await res.text();
+                showMsg('register-error', '❌ ' + (text || 'Registration failed'), 'error');
             }
-        } catch(e) {
-            showMsg("register-error", "❌ Cannot connect to server", "error");
+        } catch (e) {
+            showMsg('register-error', '❌ Cannot connect to server. Is it running on port 8080?', 'error');
         }
 
-        btn.disabled = false;
-        btn.textContent = "Create Account";
+        btn.disabled    = false;
+        btn.textContent = 'Create Account';
     }
 
-    document.addEventListener("keypress", e => {
-        if (e.key !== "Enter") return;
-        const loginVisible = document.getElementById("login-form").style.display !== "none";
-        loginVisible ? doLogin() : doRegister();
+    document.addEventListener('keypress', e => {
+        if (e.key === 'Enter') {
+            const loginVisible = document.getElementById('login-form').style.display !== 'none';
+            loginVisible ? doLogin() : doRegister();
+        }
     });
 </script>
+<script src="javaScript/main.js"></script>
 </body>
 </html>
